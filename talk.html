@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>Progressive Web Apps</title>
+    <link rel="stylesheet" href="./css/reveal.css" />
+    <link rel="stylesheet" href="./css/custom.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/solarized-light.css" />
+    <link rel="stylesheet" href="./css/print/paper.css" type="text/css" media="print" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template">
+
+# PWAs
+
+Stefan Siegl, aka Rolf  
+(@stesie23, <rolf@mayflower.de>)
+
+</script></section><section  data-markdown><script type="text/template">
+
+# Who am I?
+
+* Stefan Siegl, (inzwischen) aus Würzburg
+* Software Developer
+* hauptsächlich Spring Boot & React
+* funktionale Programmierung & DevOps
+* arbeite bei Mayflower GmbH, Würzburg
+
+</script></section><section  data-markdown><script type="text/template">
+
+# Agenda
+
+* Begriffsbestimmung
+* Konzepte
+   * Web App Manifest
+   * Service Worker
+   * Kalender, GPS, Push, ...
+* Hands On
+
+</script></section><section ><section data-markdown><script type="text/template">
+
+# Begriffsbestimmung
+
+</script></section><section data-markdown><script type="text/template">
+
+Was ist eigentliche eine "Progressive Web App"?
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: Hinzufügen Home Screen](_assets/images/Screenshot_20190923-180410_Chrome.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: Details zum Home Screeen hinzufügen](_assets/images/Screenshot_20190923-180425_Chrome.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: Launcher mit neuem Icon](_assets/images/Screenshot_20190923-180502_Trebuchet.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: Splashscreen Google Maps](_assets/images/Screenshot_20190923-180523_Chrome.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: WueWW App zum Home Screen hinzufügen](_assets/images/Screenshot_20190923-180618_Chrome.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: Splashscreen WueWW App](_assets/images/Screenshot_20190923-180629_Chrome.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+![Screenshot: WueWW App ohne Browser Chrome](_assets/images/Screenshot_20190923-180640_Chrome.png)
+
+</script></section><section data-markdown><script type="text/template">
+
+Wie geht das?
+
+</script></section></section><section ><section data-markdown><script type="text/template">
+
+# Web App Manifest
+
+* einfache JSON-Datei
+* `<link rel="manifest" href="assets/manifest.json">`
+
+</script></section><section data-markdown><script type="text/template">
+
+```json
+{
+    "name": "WueWW Fahrplan",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "icons": [
+        {
+            "src": "android-icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "density": "2.0"
+        },
+     ...
+```
+
+</script></section></section><section ><section data-markdown><script type="text/template">
+
+okay, schön und gut ...
+
+</script></section><section data-markdown><script type="text/template">
+
+aber: Funkloch!
+
+... oder: okay, das muss auch offline klappen
+
+</script></section><section data-markdown><script type="text/template">
+
+Lösung: Service Worker
+
+... der programmierbare Proxy
+
+</script></section><section data-markdown><script type="text/template">
+
+# Service Worker
+
+* separater JavaScript "Prozess"
+* kein Zugriff auf DOM
+* nur ein SW pro Host
+* kann Internetzugriffe abfangen
+* Nachrichtenaustausch Seite <-> Service Worker
+* kein direkter Einfluss, wie lange SW läuft
+
+</script></section><section data-markdown><script type="text/template">
+
+## Caching Strategien
+
+* cache first
+* cache only
+* network first
+* network only
+* stale while revalidate
+
+</script></section><section data-markdown><script type="text/template">
+
+nicht selber machen, **Google Workbox** nehmen
+
+gibt's auch als webpack-plugin :)
+
+</script></section><section data-markdown><script type="text/template">
+
+```js
+// webpack.config.js
+const workboxPlugin = require('workbox-webpack-plugin');
+
+...
+plugins: [
+  new workboxPlugin.GenerateSW({
+    swDest: 'sw.js',
+    clientsClaim: true,
+    skipWaiting: true,
+  })
+]
+```
+
+</script></section><section data-markdown><script type="text/template">
+
+```js
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+    }
+}
+```
+
+</script></section></section><section ><section data-markdown><script type="text/template">
+
+## Was geht jetzt (nicht) damit?
+
+</script></section><section data-markdown><script type="text/template">
+
+https://whatwebcando.today/
+
+</script></section><section data-markdown><script type="text/template">
+
+man kann alle Browser Features nutzen  
+(auch die weniger bekannten)
+
+* (Push) Benachrichtigung
+* Offline Storage
+* (Background) Sync
+* Audio, Video, Bilder
+* Netzwerk, Batterie, Gerätespeicher
+* Vordergrund-Erkennung
+* Geräteposition, Lage, Beschleunigung
+* Bildschirm-Orientierung
+* Bluetooth, USB
+
+</script></section><section data-markdown><script type="text/template">
+
+(noch) nicht, u.a.
+
+* Kalender
+* Kontakte
+* Task Scheduler
+* Wake Lock
+
+</script></section><section data-markdown><script type="text/template">
+
+work arounds, z.B. Kalender
+
+... man kann einen iCal Download anbieten
+
+seid kreativ :)
+
+</script></section></section><section  data-markdown><script type="text/template">
+
+# Das war's!
+
+## Fragen?
+
+Stefan Siegl (@stesie23, <rolf@mayflower.de>)
+</script></section></div>
+    </div>
+
+    <script src="./js/reveal.js"></script>
+
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // Optional libraries used to extend on reveal.js
+      var deps = [
+        { src: './plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+        { src: './plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+        { src: './plugin/zoom-js/zoom.js', async: true },
+        { src: './plugin/notes/notes.js', async: true },
+        { src: './plugin/math/math.js', async: true }
+      ];
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        dependencies: deps
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal.getQueryHash() || {};
+
+      var options = extend(defaultOptions, {}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>
